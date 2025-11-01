@@ -1,7 +1,8 @@
 import os
 import sys
 from dataclasses import dataclass
-from utils import evaluate_model
+from pathlib import Path
+from src.utils import evaluate_model
 
 from catboost import CatBoostRegressor
 from sklearn.ensemble import (
@@ -16,14 +17,17 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor
 
-from exception import CustomException
-from logger import logging 
+from src.exception import CustomException
+from src.logger import logging 
 
-from utils import save_object
+from src.utils import save_object
+
+# Get project root once at module level
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 @dataclass
 class ModelTrainerConfig:
-    trained_model_file_path=os.path.join("artifacts","model.pkl")
+    trained_model_file_path: str = os.path.join(str(PROJECT_ROOT), "artifacts", "model.pkl")
 
 class ModelTrainer:
     def __init__(self):
@@ -45,10 +49,10 @@ class ModelTrainer:
                 "Decision Tree": DecisionTreeRegressor(),
                 "Gradient Boosting": GradientBoostingRegressor(),
                 "Linear Regression": LinearRegression(),
-                "K-Neighbors Classifier": KNeighborsRegressor(),
-                "XGBClassifier": XGBRegressor(),
-                "CatBoosting Classifier": CatBoostRegressor(verbose=False),
-                "AdaBoost Classifier": AdaBoostRegressor()
+                "K-Neighbors Regressor": KNeighborsRegressor(),
+                "XGB Regressor": XGBRegressor(),
+                "CatBoosting Regressor": CatBoostRegressor(verbose=False),
+                "AdaBoost Regressor": AdaBoostRegressor()
             }
             params={
                 "Decision Tree": {
@@ -71,17 +75,17 @@ class ModelTrainer:
                     'n_estimators': [8,16,32,64,128,256]
                 },
                 "Linear Regression":{},
-                "K-Neighbors Classifier":{},
-                "XGBClassifier":{
+                "K-Neighbors Regressor":{},
+                "XGB Regressor":{
                     'learning_rate':[.1,.01,.05,.001],
                     'n_estimators': [8,16,32,64,128,256]
                 },
-                "CatBoosting Classifier":{
+                "CatBoosting Regressor":{
                     'depth': [6,8,10],
                     'learning_rate': [0.01, 0.05, 0.1],
                     'iterations': [30, 50, 100]
                 },
-                "AdaBoost Classifier":{
+                "AdaBoost Regressor":{
                     'learning_rate':[.1,.01,0.5,.001],
                     # 'loss':['linear','square','exponential'],
                     'n_estimators': [8,16,32,64,128,256]
@@ -99,21 +103,31 @@ class ModelTrainer:
                 list(model_report.values()).index(best_model_score)
             ]
             
-            best_model = models[best_model_name]
-            
             if best_model_score<0.6:
                 raise CustomException("No best model found")
-            logging.info(f"Best Found Model on both Training and Testing dataset")
+            logging.info(f"Best Found Model on both Training and Testing dataset: {best_model_name}")
             
+            # Get the best model and retrain with best params to ensure it's fitted
+            best_model = models[best_model_name]
+            best_params = params[best_model_name]
+            
+            # Perform grid search again to get best params and fitted model
+            from sklearn.model_selection import GridSearchCV
+            gs = GridSearchCV(best_model, best_params, cv=3)
+            gs.fit(X_train, y_train)
+            
+            # Get the best estimator (already fitted)
+            best_fitted_model = gs.best_estimator_
             
             save_object(
                 file_path=self.model_trainer_config.trained_model_file_path,
-                obj=best_model 
+                obj=best_fitted_model 
                 )
             
-            predicted=best_model.predict(X_test)
+            predicted=best_fitted_model.predict(X_test)
             
             r2_square = r2_score(y_test, predicted)
+            logging.info(f"Best model {best_model_name} saved with R² score: {r2_square}")
             return r2_square
                        
             

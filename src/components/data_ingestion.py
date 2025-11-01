@@ -2,24 +2,27 @@ import os
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
-from exception import CustomException
-from logger import logging
+from src.exception import CustomException
+from src.logger import logging
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
-from components.data_transformation import DataTransformation
-from components.data_transformation import DataTransformationConfig
+from src.components.data_transformation import DataTransformation
+from src.components.data_transformation import DataTransformationConfig
 
-from components.model_trainer import ModelTrainerConfig
-from components.model_trainer import ModelTrainer
+from src.components.model_trainer import ModelTrainerConfig
+from src.components.model_trainer import ModelTrainer
+
+# Get project root once at module level
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 @dataclass
 class DataIngestionConfig:
-    train_data_path: str=os.path.join('artifacts','train.csv')
-    test_data_path: str=os.path.join('artifacts','test.csv')
-    raw_data_path: str=os.path.join('artifacts','data.csv')
+    train_data_path: str=os.path.join(str(PROJECT_ROOT), 'artifacts','train.csv')
+    test_data_path: str=os.path.join(str(PROJECT_ROOT), 'artifacts','test.csv')
+    raw_data_path: str=os.path.join(str(PROJECT_ROOT), 'artifacts','data.csv')
     
 class DataIngestion:
     def __init__(self):
@@ -29,7 +32,9 @@ class DataIngestion:
         logging.info("Enter the data ingestion method or component")
 
         try:
-            df=pd.read_csv('notebook\data\stud.csv')
+            # Use project root from module level
+            data_path = os.path.join(str(PROJECT_ROOT), 'notebook', 'data', 'stud.csv')
+            df=pd.read_csv(data_path)
             logging.info("Read the dataset as dataframe")
 
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)

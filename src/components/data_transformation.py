@@ -1,7 +1,8 @@
 import sys
 import os
 from dataclasses import dataclass
-from utils import save_object
+from pathlib import Path
+from src.utils import save_object
 
 import numpy as np
 import pandas as pd
@@ -10,12 +11,15 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
 
-from exception import CustomException
-from logger import logging
+from src.exception import CustomException
+from src.logger import logging
+
+# Get project root once at module level
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 @dataclass
 class DataTransformationConfig:
-    preprocessor_obj_file_path=os.path.join('artifacts',"preprocessor.pkl")
+    preprocessor_obj_file_path: str = os.path.join(str(PROJECT_ROOT), 'artifacts', "preprocessor.pkl")
     
 class DataTransformation:
     def __init__(self):
@@ -78,8 +82,8 @@ class DataTransformation:
             input_feature_train_df=train_df.drop(columns=[target_column_name],axis=1)
             target_feature_train_df=train_df[target_column_name]
             
-            input_feature_test_df=train_df.drop(columns=[target_column_name],axis=1)
-            target_feature_test_df=train_df[target_column_name]
+            input_feature_test_df=test_df.drop(columns=[target_column_name],axis=1)
+            target_feature_test_df=test_df[target_column_name]
             
             logging.info(f"Applying preprocessing object on training dataframe and dataframe.")
             

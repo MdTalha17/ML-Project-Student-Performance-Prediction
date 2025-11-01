@@ -10,6 +10,11 @@
     <div class="container">
         <div class="login mt-5">
             <h1>Student Exam Performance Indicator</h1>
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <strong>Error:</strong> {{ error }}
+            </div>
+            {% endif %}
             <form action="{{ url_for('predict_datapoint') }}" method="post">
                 <fieldset>
                     <legend>Student Exam Performance Prediction</legend>
@@ -73,9 +78,12 @@
                     </div>
                 </fieldset>
             </form>
-            <h2>
-                The prediction is {{ results }}
-            </h2>
+            {% if results %}
+            <div class="alert alert-success mt-3" role="alert">
+                <h2>Prediction Result</h2>
+                <p class="mb-0"><strong>Predicted Math Score:</strong> {{ results }}</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </body>

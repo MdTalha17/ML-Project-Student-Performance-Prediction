@@ -10,7 +10,7 @@ def get_requirements(file_path:str)->List[str]:
     requirements=[]
     with open(file_path) as file_obj:
         requirements=file_obj.readlines()
-        [req.replace("\n","") for req in requirements]
+        requirements=[req.replace("\n","") for req in requirements]
         
         if HYPHEN_E_DOT in requirements:
             requirements.remove(HYPHEN_E_DOT)
@@ -22,6 +22,6 @@ setup(
     version='0.0.1',
     author='Mohd Talha',
     author_email='talhamoh017@gmail.com',
-    package=find_packages(),
+    packages=find_packages(),
     install_requires=get_requirements('requirements.txt')
 )
