@@ -1,7 +1,11 @@
 import os
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
+
+# Get project root once at module level
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.exception import CustomException
 from src.logger import logging
 import pandas as pd
@@ -15,8 +19,6 @@ from src.components.data_transformation import DataTransformationConfig
 from src.components.model_trainer import ModelTrainerConfig
 from src.components.model_trainer import ModelTrainer
 
-# Get project root once at module level
-PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 @dataclass
 class DataIngestionConfig:
