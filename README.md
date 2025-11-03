@@ -157,6 +157,20 @@ python -c "import flask, sklearn, xgboost, catboost; print('All dependencies ins
 
 ## 🚀 Usage
 
+### Quickstart
+
+```bash
+# 1) Create and activate venv, then install deps
+python -m venv venv && .\venv\Scripts\Activate.ps1  # Windows
+pip install -r requirements.txt
+
+# 2) Train the model (saves artifacts to artifacts/)
+python src/components/data_ingestion.py
+
+# 3) Run the web app (serves on http://127.0.0.1:8080)
+python app.py
+```
+
 ### Training the Model
 
 Train the model by running the complete pipeline:
@@ -188,8 +202,8 @@ python app.py
 ```
 
 The application will be available at:
-- **Local:** `http://127.0.0.1:5000`
-- **Network:** `http://0.0.0.0:5000` (accessible from other devices)
+- **Local:** `http://127.0.0.1:8080`
+- **Network:** `http://0.0.0.0:8080` (accessible from other devices)
 
 **Routes:**
 - `GET /` - Landing page with project information
@@ -203,16 +217,28 @@ Set environment variables for production:
 ```bash
 # Enable debug mode (development only)
 export FLASK_DEBUG=true
-
-# Set custom port
-export FLASK_RUN_PORT=5000
 ```
+
+The server listens on port 8080 by default. To change it, set `PORT` in the environment and update `app.run` if needed.
 
 **Windows PowerShell:**
 ```powershell
 $env:FLASK_DEBUG="true"
-$env:FLASK_RUN_PORT="5000"
 ```
+
+### Docker (Optional)
+
+Build and run with Docker:
+
+```bash
+# Build image
+docker build -t student-perf:latest .
+
+# Run container mapping port 8080
+docker run --rm -p 8080:8080 --name student-perf student-perf:latest
+```
+
+After the container starts, open `http://127.0.0.1:8080`.
 
 ### Programmatic Usage
 
@@ -471,11 +497,11 @@ OSError: [Errno 48] Address already in use
 ```
 **Solution:** Change port or stop conflicting process:
 ```bash
-# Option 1: Use different port
-export FLASK_RUN_PORT=5001
+# Option 1: Use different port mapping in Docker (recommended when using Docker)
+docker run -p 5001:8080 student-perf:latest
 
-# Option 2: Kill process on port 5000 (Linux/macOS)
-lsof -ti:5000 | xargs kill
+# Option 2: Kill process on port 8080 (Linux/macOS)
+lsof -ti:8080 | xargs kill
 ```
 
 ---

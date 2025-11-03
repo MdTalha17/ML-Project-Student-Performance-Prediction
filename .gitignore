@@ -131,7 +131,6 @@ venv.bak/
 # Project-specific
 logs/
 catboost_info/
-*.pkl
 
 # Spyder project settings
 .spyderproject
